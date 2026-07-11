@@ -1,0 +1,9 @@
+# Увага: aiodns НЕ встановлювати — на Windows ламає DNS-резолвінг aiohttp
+# (якщо з'явився як залежність: pip uninstall aiodns)
+ccxt>=4.3.0
+websockets>=12.0
+aiogram>=3.7.0
+aiosqlite>=0.20.0
+pydantic>=2.7.0
+pydantic-settings>=2.3.0
+PyYAML>=6.0
