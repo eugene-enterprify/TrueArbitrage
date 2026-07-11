@@ -1,0 +1,27 @@
+# Секрети — ніколи не комітити
+.env
+
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+*.egg-info/
+
+# База даних та експорти
+*.db
+*.db-journal
+*.sqlite3
+data/
+exports/
+
+# IDE / OS
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
+
+# Логи
+*.log
+logs/
