@@ -88,11 +88,13 @@ class OkxAdapter(ExchangeAdapter):
             meta = self.meta.setdefault(info.base, PairMeta())
             t = tickers.get(info.ccxt_symbol)
             if t:
-                vol = t.get("quoteVolume")
-                if vol is None and t.get("baseVolume") is not None and t.get("last"):
-                    vol = float(t["baseVolume"]) * float(t["last"])
-                if vol is not None:
-                    meta.volume_24h_usd = float(vol)
+                # Для свопів OKX ccxt кладе в baseVolume обсяг у КОНТРАКТАХ
+                # (1 контракт BTC = 0.01 BTC), тому рахуємо з сирого volCcy24h —
+                # обсягу в монетах.
+                raw = t.get("info") or {}
+                vol_ccy, last = raw.get("volCcy24h"), t.get("last")
+                if vol_ccy and last:
+                    meta.volume_24h_usd = float(vol_ccy) * float(last)
             f = fundings.get(info.ccxt_symbol)
             if f and f.get("fundingRate") is not None:
                 meta.funding_rate = float(f["fundingRate"])

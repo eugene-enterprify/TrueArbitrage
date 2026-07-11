@@ -26,10 +26,6 @@ def _fmt_money(v: float | None) -> str:
     return f"${v / 1e6:.0f}M"
 
 
-def _fmt_funding(v: float | None) -> str:
-    return "?" if v is None else f"{v * 100:+.4f}%"
-
-
 def _fmt_duration(sec: float) -> str:
     m, s = divmod(int(sec), 60)
     h, m = divmod(m, 60)
@@ -37,10 +33,13 @@ def _fmt_duration(sec: float) -> str:
 
 
 def format_spread_message(v: SpreadView) -> str:
+    # орієнтир закриття: спред закривається, коли ціни сходяться — приблизно посередині
+    close_target = (v.long_ask + v.short_bid) / 2
     lines = [
         f"🔔 <b>{v.base}/USDT</b> — спред <b>{v.gross_pct:.2f}%</b> (чистий {v.net_pct:.2f}%)",
-        f"LONG  {v.long_exchange}: ask {v.long_ask:g}  funding {_fmt_funding(v.funding_long)}",
-        f"SHORT {v.short_exchange}: bid {v.short_bid:g}  funding {_fmt_funding(v.funding_short)}",
+        f"LONG  {v.long_exchange}: купити по <b><code>{v.long_ask:g}</code></b>",
+        f"SHORT {v.short_exchange}: продати по <b><code>{v.short_bid:g}</code></b>",
+        f"Закриття: ~<b><code>{close_target:g}</code></b>",
         f"Обсяг 24h: {v.long_exchange} {_fmt_money(v.vol_long_usd)} / "
         f"{v.short_exchange} {_fmt_money(v.vol_short_usd)}",
     ]
@@ -116,7 +115,7 @@ class TelegramService:
                 f"Поріг: {self.config.threshold_pct}% | "
                 f"Мін. обсяг: ${self.config.min_volume_musd:.0f}M | "
                 f"Cooldown: {self.config.cooldown_min} хв\n"
-                "Команди: /status /top /threshold /minvolume /mute /unmute /export"
+                "Команди: /status /top /episodes /threshold /minvolume /mute /unmute /export"
             )
 
         @dp.message(Command("status"))
@@ -209,6 +208,20 @@ class TelegramService:
             await self.storage.set_setting("muted_bases", ",".join(sorted(self.config.muted_bases)))
             await message.answer(f"{base}: сповіщення увімкнено")
 
+        @dp.message(Command("episodes"))
+        async def cmd_episodes(message: Message) -> None:
+            rows = await self.storage.recent_episodes(15)
+            if not rows:
+                await message.answer("Завершених епізодів ще немає")
+                return
+            lines = ["<b>Останні епізоди спредів</b> (макс. брудний/чистий, тривалість)"]
+            for base, opened, dur, max_gross, max_net, long_ex, short_ex in rows:
+                lines.append(
+                    f"{opened[11:]}  {base}: {max_gross:.2f}%/{max_net:.2f}% "
+                    f"тривав {_fmt_duration(dur)} (long {long_ex})"
+                )
+            await message.answer("\n".join(lines), parse_mode="HTML")
+
         @dp.message(Command("export"))
         async def cmd_export(message: Message, command: CommandObject) -> None:
             hours = 24.0
@@ -230,7 +243,7 @@ class TelegramService:
 
         @dp.message(F.text)
         async def fallback(message: Message) -> None:
-            await message.answer("Невідома команда. Доступні: /status /top /threshold /minvolume /mute /unmute /export")
+            await message.answer("Невідома команда. Доступні: /status /top /episodes /threshold /minvolume /mute /unmute /export")
 
     async def run_polling(self) -> None:
         await self.dp.start_polling(self.bot, handle_signals=False)

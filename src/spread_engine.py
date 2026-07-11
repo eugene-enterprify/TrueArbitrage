@@ -82,6 +82,8 @@ class SpreadEngine:
                         short_exchange=short_ex.name,
                         long_ask=long_q.ask,
                         short_bid=short_q.bid,
+                        long_bid=long_q.bid,
+                        short_ask=short_q.ask,
                         gross_pct=gross,
                         net_pct=gross - fee,
                         funding_long=meta_long.funding_rate if meta_long else None,

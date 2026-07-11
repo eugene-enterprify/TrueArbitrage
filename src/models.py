@@ -36,6 +36,8 @@ class SpreadView:
     short_exchange: str   # де шортимо (вищий bid)
     long_ask: float
     short_bid: float
+    long_bid: float       # ціна продажу лонга (закриття long-ноги)
+    short_ask: float      # ціна відкупу шорта (закриття short-ноги)
     gross_pct: float      # брудний спред, %
     net_pct: float        # мінус 4 тейкер-комісії, %
     funding_long: float | None    # ставка фандингу на біржі long-ноги

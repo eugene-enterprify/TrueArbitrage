@@ -16,7 +16,9 @@ fees_pct:
 meta_refresh_sec: 300     # оновлення funding rates і обсягів 24h, сек
 
 sampling:
-  delta_pct: 0.1          # писати в базу при зміні спреду більш ніж на N в.п.
-  interval_sec: 60        # ...або не рідше ніж раз на N сек
+  delta_pct: 0.1              # писати в базу при зміні спреду більш ніж на N в.п.
+  interval_sec: 60            # ...або не рідше ніж раз на N сек
+  min_record_gross_pct: 0.5   # писати лише спреди від N% (мінусові й дрібні — мусор)
+  liquid_only: true           # писати лише ліквідні пари (обсяг >= min_volume_musd)
 
 db_path: data/spreads.db

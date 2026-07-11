@@ -45,9 +45,7 @@ async def spread_loop(engine, alert_engine, storage, telegram, config) -> None:
             events = alert_engine.process(views)
             for event in events:
                 await telegram.send_alert(event)
-            await storage.record_spreads(
-                views, config.sampling.delta_pct, config.sampling.interval_sec
-            )
+            await storage.record_spreads(views, config.sampling)
         except Exception:
             log.exception("Помилка в циклі розрахунку спредів")
 

@@ -23,6 +23,8 @@ class Secrets(BaseSettings):
 class SamplingConfig(BaseModel):
     delta_pct: float = 0.1
     interval_sec: int = 60
+    min_record_gross_pct: float = 0.5  # писати лише спреди від цього значення, %
+    liquid_only: bool = True           # писати лише пари, що пройшли фільтр обсягу
 
 
 class AppConfig(BaseModel):
